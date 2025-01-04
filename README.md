@@ -8,8 +8,18 @@
 
 ## Chạy ứng dụng
 
-Chạy 2 terminal (backend và frontend)
+Chạy backend:
 
-`python backend\server.py`
+`cd backend`
 
-`streamlit run frontend\ui.py`
+`python server.py`
+
+Chạy frontend:
+
+`cd frontend`
+
+`streamlit run ui.py`
+
+## Xem trực quan hóa mô hình
+
+`streamlit run app.py`

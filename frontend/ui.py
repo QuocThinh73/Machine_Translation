@@ -20,74 +20,39 @@ except requests.exceptions.RequestException as e:
 st.markdown("<h1 style='text-align: center; color: blue;'>Ứng dụng dịch văn bản</h1>",
             unsafe_allow_html=True)
 
-tab1, tab2 = st.tabs(["Các mô hình có sẵn", "Mô hình của nhóm"])
+st.header("Chọn mô hình dịch")
 
-with tab1:
-    st.header("Chọn mô hình dịch")
+if model_list:
+    model_option = st.selectbox("", model_list)
+else:
+    st.warning("Không có mô hình nào khả dụng.")
+    model_option = None
 
-    if model_list:
-        model_option = st.selectbox("", model_list)
+col1, col2 = st.columns(2)
+
+with col1:
+    st.markdown("#### Văn bản gốc")
+    text_input_1 = st.text_area(
+        "", placeholder="Nhập văn bản", height=450, key="test_input_1")
+
+with col2:
+    st.markdown("#### Bản dịch")
+    translated_placeholder_1 = st.empty()
+
+if st.button("Dịch", use_container_width=True, key="translate_button_1"):
+    if not text_input_1.strip():
+        st.warning("Bạn chưa nhập văn bản.")
     else:
-        st.warning("Không có mô hình nào khả dụng.")
-        model_option = None
+        try:
+            response = requests.post(
+                f"{backend_url}/translation", json={"text": text_input_1, "model": model_option})
 
-    col11, col12 = st.columns(2)
-
-    with col11:
-        st.markdown("#### Văn bản gốc")
-        text_input_1 = st.text_area(
-            "", placeholder="Nhập văn bản", height=450, key="test_input_1")
-
-    with col12:
-        st.markdown("#### Bản dịch")
-        translated_placeholder_1 = st.empty()
-
-    if st.button("Dịch", use_container_width=True, key="translate_button_1"):
-        if not text_input_1.strip():
-            st.warning("Bạn chưa nhập văn bản.")
-        else:
-            try:
-                response = requests.post(
-                    f"{backend_url}/translation", json={"text": text_input_1, "model": model_option})
-
-                if response.status_code == 200:
-                    translated_text = response.json().get("translated_text", "Không có kết quả")
-                    translated_placeholder_1.text_area(
-                        "", value=translated_text, disabled=True, height=450, key="translated_output_1")
-                else:
-                    st.error(
-                        f"Lỗi từ backend: {response.status_code} - {response.text}")
-            except requests.exceptions.RequestException as e:
-                st.error(f"Không thể kết nối đến backend: {e}")
-
-with tab2:
-    st.header("Mô hình của nhóm (English -> Vietnamese)")
-
-    col21, col22 = st.columns(2)
-
-    with col21:
-        st.markdown("#### Văn bản gốc")
-        text_input_2 = st.text_area(
-            "", placeholder="Nhập văn bản", height=450, key="text_input_2")
-
-    with col22:
-        st.markdown("#### Bản dịch")
-        translated_placeholder = st.empty()
-
-    if st.button("Dịch", use_container_width=True, key="translate_button_2"):
-        if not text_input_2.strip():
-            st.warning("Bạn chưa nhập văn bản.")
-        else:
-            try:
-                response = requests.post(
-                    f"{backend_url}/custom_translation", json={"text": text_input_2, "model": "custom_model"})
-
-                if response.status_code == 200:
-                    translated_text = response.json().get("translated_text", "Không có kết quả")
-                    translated_placeholder.text_area(
-                        "", value=translated_text, disabled=True, height=450, key="translated_output_2")
-                else:
-                    st.error(
-                        f"Lỗi từ backend: {response.status_code} - {response.text}")
-            except requests.exceptions.RequestException as e:
-                st.error(f"Không thể kết nối đến backend: {e}")
+            if response.status_code == 200:
+                translated_text = response.json().get("translated_text", "Không có kết quả")
+                translated_placeholder_1.text_area(
+                    "", value=translated_text, disabled=True, height=450, key="translated_output_1")
+            else:
+                st.error(
+                    f"Lỗi từ backend: {response.status_code} - {response.text}")
+        except requests.exceptions.RequestException as e:
+            st.error(f"Không thể kết nối đến backend: {e}")
